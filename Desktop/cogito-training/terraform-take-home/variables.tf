@@ -25,7 +25,8 @@ variable "zone" {
   default     = "us-east1-b"
 }
 
-variable "invokers" {
-  description = "members that can invoke this service"
-  default     = []
-}
+# (6) Where can you use this and whats the use of defining invokers?
+# variable "invokers" {
+#   description = "members that can invoke this service"
+#   default     = []
+# }
