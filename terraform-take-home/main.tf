@@ -1,20 +1,19 @@
-
-/**
-Cognitive Service  
-**/
+#######################################################################
+# Synapse AI — Terraform Foundation for Google Cloud (GCP)
+#######################################################################
 
 # Service Account
 module "service_accounts" {
   source     = "terraform-google-modules/service-accounts/google"
   version    = "~> 4.1.1"
   project_id = var.project_id
-  prefix     = "cogito-${var.env}"
+  prefix     = "mlops-${var.env}"
   names      = ["gemma2b"]
   project_roles = [
-    "cogito-372313=>roles/storage.objectCreator",
-    "cogito-372313=>roles/workflows.invoker",
-    "cogito-372313=>roles/pubsub.publisher",
-    "cogito-372313=>roles/secretmanager.secretAccessor"
+    # "=>roles/storage.objectCreator", Update this with appropriate project id
+    # "=>roles/workflows.invoker",
+    # "=>roles/pubsub.publisher",
+    # "=>roles/secretmanager.secretAccessor"
 
   ]
 }

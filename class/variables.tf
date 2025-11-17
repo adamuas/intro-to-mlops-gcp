@@ -1,9 +1,9 @@
 
 
-# variable "service_name" {
-#   description = "Service name"
-#   default     = "onnx-sentiment"
-# }
+#######################################################################
+# Synapse AI — Terraform Foundation for Google Cloud (GCP)
+#######################################################################
+
 
 variable "env" {
   description = "env"

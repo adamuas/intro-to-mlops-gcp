@@ -1,8 +1,10 @@
-
+#######################################################################
+# Synapse AI — Terraform Foundation for Google Cloud (GCP)
+#######################################################################
 
 variable "service_name" {
   description = "Service name"
-  default     = "onnx-sentiment"
+  default     = "mlops-takehome"
 }
 
 variable "env" {
@@ -12,7 +14,7 @@ variable "env" {
 
 variable "project_id" {
   description = "project_id"
-  default     = "synapse-ai-platform"
+  default     = "mlops-playground"
 }
 
 variable "region" {
