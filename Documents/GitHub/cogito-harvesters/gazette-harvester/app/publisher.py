@@ -1,9 +1,9 @@
 """
-Google Cloud Pub/Sub publisher for Twitter data
+Google Cloud Pub/Sub publisher for News data
 """
 import os
 import json
-from typing import List, Dict, Any
+from typing import List, Any
 from concurrent import futures
 from google.cloud import pubsub_v1
 
@@ -11,12 +11,12 @@ from google.cloud import pubsub_v1
 DEFAULT_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT", "")
 # Use socials-inference-output since data is already NLP-annotated
 DEFAULT_TOPIC = os.environ.get("PUBSUB_TOPIC", "socials-inference-output")
-BATCH_SIZE = 100  # Number of tweets per message
+BATCH_SIZE = 50  # Number of articles per message
 
 
-class TwitterPublisher:
+class NewsPublisher:
     """
-    Publisher for sending tweet data to Pub/Sub.
+    Publisher for sending news article data to Pub/Sub.
     """
 
     def __init__(
@@ -40,52 +40,45 @@ class TwitterPublisher:
         self.publisher = pubsub_v1.PublisherClient()
         self.topic_path = self.publisher.topic_path(self.project_id, self.topic_id)
 
-        # Configure batch settings for efficiency
-        self.batch_settings = pubsub_v1.types.BatchSettings(
-            max_messages=100,
-            max_bytes=1024 * 1024,  # 1MB
-            max_latency=1,  # 1 second
-        )
-
-    def _serialize_tweet(self, tweet: Any) -> Dict[str, Any]:
+    def _serialize_article(self, article: Any) -> dict:
         """
-        Serialize a tweet model to dictionary.
+        Serialize an article model to dictionary.
         """
-        if hasattr(tweet, "model_dump"):
-            return tweet.model_dump()
-        elif hasattr(tweet, "dict"):
-            return tweet.dict()
-        elif isinstance(tweet, dict):
-            return tweet
+        if hasattr(article, "model_dump"):
+            return article.model_dump()
+        elif hasattr(article, "dict"):
+            return article.dict()
+        elif isinstance(article, dict):
+            return article
         else:
-            raise ValueError(f"Cannot serialize tweet of type {type(tweet)}")
+            raise ValueError(f"Cannot serialize article of type {type(article)}")
 
-    def publish_tweets(
+    def publish_articles(
         self,
-        tweets: List[Any],
+        articles: List[Any],
         project_id: str,
         job_id: str
     ) -> int:
         """
-        Publish tweets to Pub/Sub topic.
+        Publish articles to Pub/Sub topic.
 
-        Tweets are batched into messages for efficiency.
+        Articles are batched into messages for efficiency.
 
         Args:
-            tweets: List of Tweet models or dictionaries
+            articles: List of Article models or dictionaries
             project_id: Project ID for routing
             job_id: Job ID for tracking
 
         Returns:
             Number of messages published
         """
-        if not tweets:
+        if not articles:
             return 0
 
-        # Serialize tweets
-        serialized = [self._serialize_tweet(t) for t in tweets]
+        # Serialize articles
+        serialized = [self._serialize_article(a) for a in articles]
 
-        # Batch tweets into messages
+        # Batch articles into messages
         messages_published = 0
         publish_futures = []
 
@@ -97,7 +90,7 @@ class TwitterPublisher:
                 "job_id": job_id,
                 "batch_index": i // BATCH_SIZE,
                 "total_batches": (len(serialized) + BATCH_SIZE - 1) // BATCH_SIZE,
-                "tweets": batch
+                "articles": batch
             }
 
             # Publish message
@@ -120,42 +113,6 @@ class TwitterPublisher:
                 print(f"Error publishing message: {e}")
 
         return messages_published
-
-    def publish_single(
-        self,
-        tweet: Any,
-        project_id: str,
-        job_id: str
-    ) -> str:
-        """
-        Publish a single tweet to Pub/Sub.
-
-        Args:
-            tweet: Tweet model or dictionary
-            project_id: Project ID for routing
-            job_id: Job ID for tracking
-
-        Returns:
-            Message ID
-        """
-        serialized = self._serialize_tweet(tweet)
-
-        message_data = {
-            "project_id": project_id,
-            "job_id": job_id,
-            "tweets": [serialized]
-        }
-
-        data = json.dumps(message_data).encode("utf-8")
-        future = self.publisher.publish(
-            self.topic_path,
-            data,
-            project_id=project_id,
-            job_id=job_id,
-            content_type="application/json"
-        )
-
-        return future.result()
 
 
 def create_topic_if_not_exists(project_id: str, topic_id: str) -> str:
