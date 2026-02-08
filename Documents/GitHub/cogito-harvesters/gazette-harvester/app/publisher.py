@@ -9,8 +9,8 @@ from google.cloud import pubsub_v1
 
 # Default configuration
 DEFAULT_PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT", "")
-# Use socials-inference-output since data is already NLP-annotated
-DEFAULT_TOPIC = os.environ.get("PUBSUB_TOPIC", "socials-inference-output")
+# Use socials-harvester-output for harvested data
+DEFAULT_TOPIC = os.environ.get("PUBSUB_TOPIC", "socials-harvester-output")
 BATCH_SIZE = 50  # Number of articles per message
 
 

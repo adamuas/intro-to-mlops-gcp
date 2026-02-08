@@ -56,7 +56,7 @@ gcloud run deploy twitter-harvester \
     --allow-unauthenticated \
     --memory 1Gi \
     --timeout 300 \
-    --set-env-vars "GOOGLE_CLOUD_PROJECT=$PROJECT_ID,PUBSUB_TOPIC=socials-inference-output,GLINER_ENDPOINT=$GLINER_ENDPOINT,VERTEX_LOCATION=$VERTEX_LOCATION,VERTEX_EMBEDDING_ENDPOINT_ID=$VERTEX_EMBEDDING_ENDPOINT_ID" \
+    --set-env-vars "GOOGLE_CLOUD_PROJECT=$PROJECT_ID,PUBSUB_TOPIC=socials-harvester-output,GLINER_ENDPOINT=$GLINER_ENDPOINT,VERTEX_LOCATION=$VERTEX_LOCATION,VERTEX_EMBEDDING_ENDPOINT_ID=$VERTEX_EMBEDDING_ENDPOINT_ID" \
     --set-secrets "APIFY_API_TOKEN=synapse-dev-apify-api-key:latest"
 
 # Deploy Gazette Harvester
@@ -69,7 +69,7 @@ gcloud run deploy gazette-harvester \
     --allow-unauthenticated \
     --memory 1Gi \
     --timeout 300 \
-    --set-env-vars "GOOGLE_CLOUD_PROJECT=$PROJECT_ID,PUBSUB_TOPIC=socials-inference-output,GLINER_ENDPOINT=$GLINER_ENDPOINT,VERTEX_LOCATION=$VERTEX_LOCATION,VERTEX_EMBEDDING_ENDPOINT_ID=$VERTEX_EMBEDDING_ENDPOINT_ID" \
+    --set-env-vars "GOOGLE_CLOUD_PROJECT=$PROJECT_ID,PUBSUB_TOPIC=socials-harvester-output,GLINER_ENDPOINT=$GLINER_ENDPOINT,VERTEX_LOCATION=$VERTEX_LOCATION,VERTEX_EMBEDDING_ENDPOINT_ID=$VERTEX_EMBEDDING_ENDPOINT_ID" \
     --set-secrets "NEWS_API_KEY=synapse-dev-news-api-key:latest"
 
 echo ""
