@@ -71,7 +71,7 @@ class TwitterScraper:
     def search_tweets(
         self,
         search_terms: List[str],
-        max_tweets: int = 30,
+        max_tweets: int = 100,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
         include_replies: bool = False,
@@ -104,22 +104,24 @@ class TwitterScraper:
                 query += " -filter:replies"
             search_queries.append(query)
 
-        # Prepare actor input
+        # Prepare actor input (using correct Apify parameter names)
         actor_input = {
             "searchTerms": search_queries,
-            "maxTweets": max_tweets,
+            "maxItems": max_tweets,
             "sort": "Latest",
+            "includeSearchTerms": False,
+            "onlyVerifiedUsers": False,
+            "onlyTwitterBlue": False,
+            "onlyImage": False,
+            "onlyVideo": False,
+            "onlyQuote": False,
         }
-
-        # Only add tweetLanguage if valid
-        if valid_language:
-            actor_input["tweetLanguage"] = valid_language
 
         # Add date filters if provided
         if start_date:
-            actor_input["startDate"] = start_date.strftime("%Y-%m-%d")
+            actor_input["start"] = start_date.strftime("%Y-%m-%d")
         if end_date:
-            actor_input["endDate"] = end_date.strftime("%Y-%m-%d")
+            actor_input["end"] = end_date.strftime("%Y-%m-%d")
 
         # Run the actor
         run = self.client.actor(TWEET_SCRAPER_ACTOR).call(run_input=actor_input)
@@ -134,7 +136,7 @@ class TwitterScraper:
     def scrape_user_tweets(
         self,
         usernames: List[str],
-        max_tweets: int = 30,
+        max_tweets: int = 100,
         include_replies: bool = False
     ) -> List[Dict[str, Any]]:
         """
@@ -170,7 +172,7 @@ class TwitterScraper:
     def scrape_hashtag(
         self,
         hashtags: List[str],
-        max_tweets: int = 30,
+        max_tweets: int = 100,
         language: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """

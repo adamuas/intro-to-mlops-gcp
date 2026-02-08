@@ -19,7 +19,7 @@ class HarvestRequest(BaseModel):
     project_id: str = Field(..., description="Project ID for data routing")
     search_terms: List[str] = Field(..., description="List of search terms/usernames/hashtags")
     search_type: SearchType = Field(default=SearchType.KEYWORD, description="Type of search")
-    max_tweets: int = Field(default=30, ge=1, le=30, description="Maximum tweets to harvest (capped at 30)")
+    max_tweets: int = Field(default=100, ge=1, le=100, description="Maximum tweets to harvest (capped at 100)")
     start_date: Optional[datetime] = Field(default=None, description="Start date filter")
     end_date: Optional[datetime] = Field(default=None, description="End date filter")
     include_replies: bool = Field(default=False, description="Include reply tweets")
