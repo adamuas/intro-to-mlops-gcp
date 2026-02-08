@@ -71,7 +71,7 @@ class TwitterScraper:
     def search_tweets(
         self,
         search_terms: List[str],
-        max_tweets: int = 100,
+        max_tweets: int = 30,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
         include_replies: bool = False,
@@ -134,7 +134,7 @@ class TwitterScraper:
     def scrape_user_tweets(
         self,
         usernames: List[str],
-        max_tweets: int = 100,
+        max_tweets: int = 30,
         include_replies: bool = False
     ) -> List[Dict[str, Any]]:
         """
@@ -170,7 +170,7 @@ class TwitterScraper:
     def scrape_hashtag(
         self,
         hashtags: List[str],
-        max_tweets: int = 100,
+        max_tweets: int = 30,
         language: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """

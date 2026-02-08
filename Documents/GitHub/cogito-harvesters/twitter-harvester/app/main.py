@@ -189,7 +189,7 @@ def run_synapse_search_job(
         # Scrape tweets using keyword search
         raw_tweets = scraper.search_tweets(
             search_terms=[request.query],
-            max_tweets=request.limit or 100,
+            max_tweets=min(request.limit or 30, 30),
             start_date=start_date,
             end_date=end_date,
             include_replies=False,
