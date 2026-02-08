@@ -10,17 +10,20 @@ main:
         - init_variables:
             assign:
                 - query: ${harvester_request.query}
-                - source_type: ${default(harvester_request.source_type, "apify-twitter")}
                 - project_id: ${harvester_request.project_id}
-                - client_id: ${default(harvester_request.client_id, "cogito-client")}
-                - language: ${default(harvester_request.language, "en")}
-                - limit: ${default(harvester_request.limit, 100)}
-                - start_date: ${default(harvester_request.start_date, null)}
-                - end_date: ${default(harvester_request.end_date, null)}
-                - environment: ${default(harvester_request.env, "dev")}
                 # Harvester endpoints
                 - twitter_harvester_url: "https://twitter-harvester-yuihlohota-nw.a.run.app/search"
                 - gazette_harvester_url: "https://gazette-harvester-yuihlohota-nw.a.run.app/search"
+
+        - set_optional_vars:
+            assign:
+                - source_type: ${default(map.get(harvester_request, "source_type"), "apify-twitter")}
+                - client_id: ${default(map.get(harvester_request, "client_id"), "cogito-client")}
+                - language: ${default(map.get(harvester_request, "language"), "en")}
+                - limit: ${default(map.get(harvester_request, "limit"), 100)}
+                - start_date: ${map.get(harvester_request, "start_date")}
+                - end_date: ${map.get(harvester_request, "end_date")}
+                - environment: ${default(map.get(harvester_request, "env"), "dev")}
 
         - determine_harvester:
             switch:
