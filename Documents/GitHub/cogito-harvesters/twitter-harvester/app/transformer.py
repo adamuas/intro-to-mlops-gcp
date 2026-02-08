@@ -51,16 +51,18 @@ def extract_hashtags(tweet_data: Dict) -> List[str]:
     hashtags = []
 
     # From entities
-    if "entities" in tweet_data and "hashtags" in tweet_data["entities"]:
-        for ht in tweet_data["entities"]["hashtags"]:
+    entities = tweet_data.get("entities")
+    if isinstance(entities, dict) and "hashtags" in entities:
+        for ht in entities.get("hashtags", []):
             if isinstance(ht, dict):
                 hashtags.append(ht.get("tag", ht.get("text", "")))
             elif isinstance(ht, str):
                 hashtags.append(ht)
 
     # From text using regex
-    if "text" in tweet_data:
-        found = re.findall(r'#(\w+)', tweet_data.get("text", ""))
+    text = tweet_data.get("text", "")
+    if isinstance(text, str):
+        found = re.findall(r'#(\w+)', text)
         hashtags.extend(found)
 
     return list(set(hashtags))
@@ -71,8 +73,9 @@ def extract_mentions(tweet_data: Dict) -> List[Mention]:
     mentions = []
 
     # From entities
-    if "entities" in tweet_data and "mentions" in tweet_data["entities"]:
-        for m in tweet_data["entities"]["mentions"]:
+    entities = tweet_data.get("entities")
+    if isinstance(entities, dict) and "mentions" in entities:
+        for m in entities.get("mentions", []):
             if isinstance(m, dict):
                 mentions.append(Mention(
                     id=str(m.get("id", m.get("id_str", ""))),
@@ -81,8 +84,9 @@ def extract_mentions(tweet_data: Dict) -> List[Mention]:
                 ))
 
     # From mentionedUsers (Apify format)
-    if "mentionedUsers" in tweet_data:
-        for m in tweet_data.get("mentionedUsers", []):
+    mentioned_users = tweet_data.get("mentionedUsers", [])
+    if isinstance(mentioned_users, list):
+        for m in mentioned_users:
             if isinstance(m, dict):
                 mentions.append(Mention(
                     id=str(m.get("id", "")),
@@ -98,16 +102,18 @@ def extract_urls(tweet_data: Dict) -> List[str]:
     urls = []
 
     # From entities
-    if "entities" in tweet_data and "urls" in tweet_data["entities"]:
-        for u in tweet_data["entities"]["urls"]:
+    entities = tweet_data.get("entities")
+    if isinstance(entities, dict) and "urls" in entities:
+        for u in entities.get("urls", []):
             if isinstance(u, dict):
                 urls.append(u.get("expanded_url", u.get("url", "")))
             elif isinstance(u, str):
                 urls.append(u)
 
     # From outlinks (Apify format)
-    if "outlinks" in tweet_data:
-        urls.extend(tweet_data.get("outlinks", []))
+    outlinks = tweet_data.get("outlinks", [])
+    if isinstance(outlinks, list):
+        urls.extend([u for u in outlinks if isinstance(u, str)])
 
     return list(set(filter(None, urls)))
 
@@ -117,8 +123,9 @@ def extract_photos(tweet_data: Dict) -> List[str]:
     photos = []
 
     # From media
-    if "media" in tweet_data:
-        for m in tweet_data.get("media", []):
+    media = tweet_data.get("media", [])
+    if isinstance(media, list):
+        for m in media:
             if isinstance(m, dict):
                 if m.get("type") == "photo":
                     photos.append(m.get("url", m.get("media_url_https", "")))
@@ -126,9 +133,10 @@ def extract_photos(tweet_data: Dict) -> List[str]:
                 photos.append(m)
 
     # From extendedEntities
-    if "extendedEntities" in tweet_data and "media" in tweet_data["extendedEntities"]:
-        for m in tweet_data["extendedEntities"]["media"]:
-            if m.get("type") == "photo":
+    extended_entities = tweet_data.get("extendedEntities")
+    if isinstance(extended_entities, dict) and "media" in extended_entities:
+        for m in extended_entities.get("media", []):
+            if isinstance(m, dict) and m.get("type") == "photo":
                 photos.append(m.get("media_url_https", ""))
 
     return list(set(filter(None, photos)))
@@ -199,8 +207,10 @@ def transform_apify_tweet(
     embedding = get_embedding(tweet_text)
 
     # Check if retweet
-    is_retweet = tweet_data.get("isRetweet", False) or tweet_text.startswith("RT @")
+    is_retweet = tweet_data.get("isRetweet", False) or (isinstance(tweet_text, str) and tweet_text.startswith("RT @"))
     retweeted_tweet = tweet_data.get("retweetedTweet", tweet_data.get("retweeted_status"))
+    if not isinstance(retweeted_tweet, dict):
+        retweeted_tweet = None
 
     # Build reply info
     reply_to = None
@@ -225,7 +235,7 @@ def transform_apify_tweet(
         tweet=tweet_text,
         lang=tweet_data.get("lang", tweet_data.get("language")),
         hashtags=extract_hashtags(tweet_data),
-        cashtags=tweet_data.get("cashtags", []),
+        cashtags=tweet_data.get("cashtags", []) if isinstance(tweet_data.get("cashtags"), list) else [],
         user_id_str=user_id,
         username=username,
         name=display_name,
