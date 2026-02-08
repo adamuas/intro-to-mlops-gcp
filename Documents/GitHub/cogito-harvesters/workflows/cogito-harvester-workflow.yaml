@@ -1,0 +1,74 @@
+main:
+    params: [harvester_request]
+    steps:
+        - log_request:
+            call: sys.log
+            args:
+                text: ${harvester_request}
+                severity: "INFO"
+
+        - init_variables:
+            assign:
+                - query: ${harvester_request.query}
+                - source_type: ${default(harvester_request.source_type, "apify-twitter")}
+                - project_id: ${harvester_request.project_id}
+                - client_id: ${default(harvester_request.client_id, "cogito-client")}
+                - language: ${default(harvester_request.language, "en")}
+                - limit: ${default(harvester_request.limit, 100)}
+                - start_date: ${default(harvester_request.start_date, null)}
+                - end_date: ${default(harvester_request.end_date, null)}
+                - env: ${default(harvester_request.env, "dev")}
+                # Harvester endpoints
+                - twitter_harvester_url: "https://twitter-harvester-yuihlohota-nw.a.run.app/search"
+                - gazette_harvester_url: "https://gazette-harvester-yuihlohota-nw.a.run.app/search"
+
+        - determine_harvester:
+            switch:
+                - condition: ${source_type == "apify-twitter" or source_type == "twitter-api"}
+                  assign:
+                      - harvester_url: ${twitter_harvester_url}
+                      - harvester_name: "twitter-harvester"
+                - condition: ${source_type == "webzio-news" or source_type == "webzio-reviews" or source_type == "newsapi"}
+                  assign:
+                      - harvester_url: ${gazette_harvester_url}
+                      - harvester_name: "gazette-harvester"
+            next: log_harvester_selection
+
+        - log_harvester_selection:
+            call: sys.log
+            args:
+                text: ${"Using " + harvester_name + " for source_type " + source_type}
+                severity: "INFO"
+
+        - call_harvester:
+            call: http.post
+            args:
+                url: ${harvester_url}
+                headers:
+                    Content-Type: "application/json"
+                body:
+                    query: ${query}
+                    source_type: ${source_type}
+                    project_id: ${project_id}
+                    client_id: ${client_id}
+                    language: ${language}
+                    limit: ${limit}
+                    start_date: ${start_date}
+                    end_date: ${end_date}
+                    env: ${env}
+                timeout: 300
+            result: harvester_response
+
+        - log_harvester_response:
+            call: sys.log
+            args:
+                text: ${harvester_response}
+                severity: "INFO"
+
+        - return_result:
+            return:
+                status: "success"
+                harvester: ${harvester_name}
+                source_type: ${source_type}
+                job_id: ${harvester_response.body.job_id}
+                message: ${"Harvester job started for project " + project_id}

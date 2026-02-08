@@ -1,0 +1,44 @@
+main:
+    params: [harvester_request]
+    steps:
+        - log_request:
+            call: sys.log
+            args:
+                text: ${harvester_request}
+        - init_variables:
+            assign: # Read variables from request body below
+                - ingest_endpoint: ${harvester_request.ingest_endpoint}
+                - query: ${harvester_request.query}
+                - source_type: ${harvester_request.source_type} # Currently options are: twitter-api, webzio-news, webzio-reviews, apify-twitter
+                - project_id: ${harvester_request.project_id}
+                - client_id: ${harvester_request.client_id}
+                - language: ${harvester_request.language} # Optional on synapse-feeds side
+                - limit: ${harvester_request.limit} # Optional on synapse-feeds side
+                - startDate: ${harvester_request.startDate} # Optional on synapse-feeds side
+                - endDate: ${harvester_request.endDate} # Optional on synapse-feeds side
+
+        - synapse-feeds-ingest-job: # Use Synapse Feeds API to Fetch Data
+            steps:
+            - initiate-ingest-job:
+                call: http.post
+                args:
+                    url: ${ingest_endpoint}
+                    body: # Search specification
+                        query: ${query}
+                        callback_url: ${harvester_request.ingest_endpoint}
+                        source_type: ${source_type}
+                        project_id: ${project_id}
+                        client_id: ${client_id}
+                        language: ${language}
+                        limit: ${limit}
+                        end_date: ${endDate}
+                        start_date: ${startDate}
+                result: ingest_job_status # we expect this: {"status": "Started.", "job_id": job_id, "payload": ...}
+            - log-ingest-job-status:
+                call: sys.log
+                args:
+                    text: ${ingest_job_status}
+
+        - return-workflow-results:
+            return:
+                ingest_job_status: ${ingest_job_status}
