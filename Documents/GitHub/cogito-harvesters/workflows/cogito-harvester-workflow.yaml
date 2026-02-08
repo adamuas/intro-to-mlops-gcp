@@ -17,7 +17,7 @@ main:
                 - limit: ${default(harvester_request.limit, 100)}
                 - start_date: ${default(harvester_request.start_date, null)}
                 - end_date: ${default(harvester_request.end_date, null)}
-                - env: ${default(harvester_request.env, "dev")}
+                - environment: ${default(harvester_request.env, "dev")}
                 # Harvester endpoints
                 - twitter_harvester_url: "https://twitter-harvester-yuihlohota-nw.a.run.app/search"
                 - gazette_harvester_url: "https://gazette-harvester-yuihlohota-nw.a.run.app/search"
@@ -55,7 +55,7 @@ main:
                     limit: ${limit}
                     start_date: ${start_date}
                     end_date: ${end_date}
-                    env: ${env}
+                    env: ${environment}
                 timeout: 300
             result: harvester_response
 
